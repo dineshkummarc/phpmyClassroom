@@ -69,14 +69,3 @@ Screen Shot
 <p align="center"><b>Whiteboard writing PDF download Preview</b></p>
 <img src="https://github.com/TanzinaTani/Classroom/blob/master/Interface%20Picture/screenshot%20interface/routine.png">
 <p align="center"><b>Course Routine</b></p>
-
-
-
-
-
-
-
-
-
-
-
