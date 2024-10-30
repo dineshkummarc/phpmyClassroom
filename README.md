@@ -1,6 +1,10 @@
 # phpmyClassroom
 formerly EduHome Online Classroom System
 
+# restore Database
+1. php artisan migrate:fresh --seed
+2. php artisan key:generate
+
 ## Introduction & Motivations:
 
 The online classroom is a very popular platform for the education system. Many countries are now enforcing the online classroom  system so that the teachers and students can communicate with each other. For example a very common and known to all ‘Google Classroom’. This online classroom system provides many facilities like shared materials, assignments, grade students, create unlimited courses, add students in there, etc.  This is a great opportunity for every educational institute to enlarge and ease their education system. After the covid-19 breakdown, most of the educational institutes all around the world went into the online classroom system. They are using many online classroom platforms like ‘TalentLMS’,’ Google Classroom’, ‘visme’, etc. So, we have got the motivation to make this online classroom system for teachers and students. 
