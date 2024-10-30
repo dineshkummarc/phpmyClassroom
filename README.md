@@ -1,4 +1,5 @@
-# EduHome Online Classroom System
+# phpmyClassroom
+formerly EduHome Online Classroom System
 
 ## Introduction & Motivations:
 
