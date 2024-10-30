@@ -2,7 +2,8 @@
 formerly EduHome Online Classroom System
 
 # restore Database
-php artisan migrate:fresh --seed
+1. php artisan migrate:fresh --seed
+2. php artisan key:generate
 
 ## Introduction & Motivations:
 
