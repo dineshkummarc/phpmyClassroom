@@ -3,43 +3,42 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-
-//custom added
 use App\Http\Controllers\Notification\NotificationController as Notification;
 use App\Http\Controllers\Notification\Template\NotificationTemplateController as NotificationTemplate;
 use App\Models\User;
-use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
-//custom controllers
-use Validator;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class LoginController extends Controller
 {
-    //
     public function login(Request $request)
     {
-        $reqData = $request->all();
-
         $validator = Validator::make($request->all(), [
             'login_id' => 'required',
             'password' => 'required',
         ]);
 
-        if (!$validator->passes()) {
+        if ($validator->fails()) {
             return response()->json([
                 'error'    => 1,
                 'errorMsg' => $validator->errors()->all(),
             ]);
         }
 
-        $credentials = $request->only('login_id', 'password');
+        // Define credentials with the login_id field as required by your system
+        $credentials = [
+            'login_id' => $request->input('login_id'),
+            'password' => $request->input('password'),
+        ];
 
+        // Attempt to log in with the provided credentials
         if (Auth::attempt($credentials)) {
             return response()->json([
                 'error'    => 0,
-                'errorMsg' => 'Successfully Login',
+                'errorMsg' => 'Successfully logged in',
             ]);
         }
 
@@ -51,8 +50,8 @@ class LoginController extends Controller
 
     public function getRandomString($len = 6)
     {
-        $characters   = '0123456789abcdefghijklmnopqrstuvwxyz';
-        $randomString = "";
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
+        $randomString = '';
         for ($i = 0; $i < $len; $i++) {
             $index = rand(0, strlen($characters) - 1);
             $randomString .= $characters[$index];
@@ -62,17 +61,15 @@ class LoginController extends Controller
 
     public function registration(Request $request)
     {
-        $reqData = $request->all();
-
         $validator = Validator::make($request->all(), [
             'full_name' => 'required',
             'nick_name' => 'required',
             'user_type' => 'required',
-            'email'     => 'required|email',
-            'phone'     => 'required|regex:/^((01)[0-9\s\-\+\(\)]*)$/|min:10',
+            'email'     => 'required|email'
+            // 'phone'     => 'required|regex:/^((01)[0-9\s\-\+\(\)]*)$/|min:10',
         ]);
 
-        if (!$validator->passes()) {
+        if ($validator->fails()) {
             return response()->json([
                 'error'    => 1,
                 'errorMsg' => $validator->errors()->all(),
@@ -80,25 +77,22 @@ class LoginController extends Controller
         }
 
         $data = $request->except('_token');
+        $password = $this->getRandomString(6); // Generate random password
+        $data['login_id'] = $this->getRandomString(10); // Generate random login_id
+        $data['password'] = bcrypt($password); // Hash the password for storage
 
-        $password = $this->getRandomString(6);
+        // Create user and get the ID
+        $user = User::create($data);
 
-        $data['login_id'] = $this->getRandomString(10);
-        $data['password'] = bcrypt($password);
+        $loginIdPrefix = substr($request->input('user_type'), 0, 1);
+        $loginId = $loginIdPrefix . '-' . $user->id;
 
-        $createUserId = User::create($data)->id;
+        // Update login_id in the database
+        $user->update(['login_id' => $loginId]);
 
-        $loginIdPrefix = substr($reqData['user_type'], 0, 1);
-        $loginId       = $loginIdPrefix . "-" . $createUserId;
-
-        DB::table('users')
-            ->where('id', $createUserId)
-            ->update(['login_id' => $loginId]);
-
-        $nickName = $data['nick_name'];
-
+        // Send notifications
         $notificationTemplate = NotificationTemplate::set('welcome', [
-            'nick_name' => $nickName,
+            'nick_name' => $data['nick_name'],
             'login_id'  => $loginId,
             'password'  => $password,
         ]);
@@ -116,14 +110,6 @@ class LoginController extends Controller
         ]);
 
         return view('home/registration_success', ['loginId' => $loginId, 'password' => $password]);
-
-        return response()->json([
-            'error'    => 0,
-            'errorMsg' => view('home/registration_success'),
-            'loginId'  => $loginId,
-            'password' => $password,
-        ]);
-
     }
 
     public function logOut()

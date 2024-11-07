@@ -52,7 +52,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'http://local.rocket.co.in:8081/phpmyClassroom'),
 
     'asset_url' => env('ASSET_URL', null),
 
